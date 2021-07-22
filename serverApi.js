@@ -27,15 +27,17 @@ const express = require('express');
 
 const app = express();
 
+require('./app/routes/keys.route.js')(app);
+
 require('./app/version.js')(app);
 require('./app/client.js')(app);  // Read data of a Client
-require('./app/login2.js')(app);  // Once Read Sensor Data, this should replace the existing login.
-require('./app/dread.js')(app);   // Read Data of a Location/Sensor with DNC
+require('./app/login.js')(app);  // Once Read Sensor Data, this should replace the existing login.
+require('./app/sread.js')(app);   // Read Data of a Location/Sensor with DNC
 
 
-var server = app.listen(8992, function () {
+var server = app.listen(8892, function () {
   var host = server.address().address
   var port = server.address().port
-  console.log("WeRadiate Server API V1.0.3 - Listening http://%s:%s", host, port)
+  console.log("WakeField Server API V1.0.0-2 - Listening http://%s:%s", host, port)
 });
 

@@ -28,7 +28,7 @@ const constants = require('./constants');
 
 
 module.exports = function(app) {
-    app.post('/login2',  verifyAccount, function(req, res) {
+    app.post('/login',  verifyAccount, function(req, res) {
     
     const user = req.query
     
@@ -65,7 +65,7 @@ function verifyAccount(req, res, next){
     else
     {
         var options = {
-            url: 'http://localhost:8082/login',
+            url: 'http://localhost:8891/plogin',
             method: 'POST', 
             headers: {'Content-Type': 'application/json' },
             form: {'uname':uname,'pwd':pwd }
@@ -78,21 +78,20 @@ function verifyAccount(req, res, next){
             }
             else
             {
+                console.log("Reply received from Plugin")
                 if(resp.statusCode == 200)
                 {
+                    console.log("Resp code 200: ", resp.body)
                     req.apidata = resp.body;
                     next();
                 }
                 else
                 {
                     //console.error(resp.body)
-                    res.sendStatus(401);
+                    console.log("Resp code != 200: ", resp.body)
+                    res.status(401).send(resp.body);
                 }
             }
         });
     }
 }
-
-
-
-

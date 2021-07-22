@@ -24,6 +24,6 @@
 
 module.exports = function (app) {
     app.get('/version', function(req, res) {
-        res.status(200).json('WeRadiate Server API V1.0.3');
+        res.status(200).json('WakeFiled Server API V1.0.0-2');
     });
 }
