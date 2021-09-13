@@ -18,11 +18,12 @@
 #     Seenivasan V, MCCI Corporation February 2021
 #
 # Revision history:
-#     V1.0.3 Wed Feb 17 2021 11:24:35 seenivasan
+#     V1.0.1 Mon Sep 13 2021 11:24:35 seenivasan
 #       Module created
 ############################################################################*/
 
 const express = require('express');
+const appconst = require('./app/misc/constants.js');
 /*var request = require('request');*/
 
 const app = express();
@@ -35,9 +36,9 @@ require('./app/login.js')(app);  // Once Read Sensor Data, this should replace t
 require('./app/sread.js')(app);   // Read Data of a Location/Sensor with DNC
 
 
-var server = app.listen(8892, function () {
+var server = app.listen(appconst.APP_PORT, function () {
   var host = server.address().address
   var port = server.address().port
-  console.log("WakeField Server API V1.0.0-2 - Listening http://%s:%s", host, port)
+  console.log(""+appconst.APP_NAME+" v"+appconst.APP_VERSION+" Listening http://%s:%s", host, port)
 });
 

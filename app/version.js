@@ -18,12 +18,14 @@
 #     Seenivasan V, MCCI Corporation February 2021
 #
 # Revision history:
-#     V1.0.3 Wed Feb 23 2021 11:24:35 seenivasan
+#     V1.0.1 MON Sep 13 2021 11:24:35 seenivasan
 #       Module created
 ############################################################################*/
 
+const appconst = require('./misc/constants.js');
+
 module.exports = function (app) {
     app.get('/version', function(req, res) {
-        res.status(200).json('WakeFiled Server API V1.0.0-2');
+        res.status(200).json(""+appconst.APP_NAME+" v"+appconst.APP_VERSION);
     });
 }

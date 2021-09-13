@@ -1,8 +1,7 @@
 module.exports = Object.freeze({
-    INFLUX_URL: "https://staging-analytics.weradiate.com/influxdb:8086",
-    INFLUX_UNAME: "ezra",
-    INFLUX_PWD: "1millioncompost",
-
+    APP_NAME: "WakeField Server API",
+    APP_VERSION: "1.0.0",
+    APP_PORT: 8892,
     BASE_URL: "http://influxdb:8086/",
 
     // Status Codes
