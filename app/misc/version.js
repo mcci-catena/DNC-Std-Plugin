@@ -1,9 +1,9 @@
 /*############################################################################
 # 
-# Module: keys.route.js
+# Module: version.js
 #
 # Description:
-#     Route declaration for InfluxDB measurement , Tag key and Tag value 
+#     Endpoint for showing version
 #
 # Copyright notice:
 #     This file copyright (c) 2021 by
@@ -22,13 +22,8 @@
 #       Module created
 ############################################################################*/
 
-const keyctrl = require('../controllers/keys.controller');
+const appconst = require('./constants');
 
-module.exports = (app) => {
-
-    app.post('/dbs', keyctrl.getdbs);
-    app.post('/meas/:dbn', keyctrl.getmeas);
-    app.post('/fields', keyctrl.getfields);
-    app.post('/tags', keyctrl.gettags);
-    app.post('/tvals/:tkey', keyctrl.gettvals);
+exports.getVersion = (req, res) => {
+    res.status(200).json(""+appconst.APP_NAME+" v"+appconst.APP_VERSION);
 }
