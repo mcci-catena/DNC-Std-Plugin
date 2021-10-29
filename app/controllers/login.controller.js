@@ -1,6 +1,6 @@
 /*############################################################################
 # 
-# Module: login2.js
+# Module: login.js
 #
 # Description:
 #     API for login request from Plugin
@@ -18,44 +18,16 @@
 #     Seenivasan V, MCCI Corporation February 2021
 #
 # Revision history:
-#     V1.0.2 Wed Feb 17 2021 11:24:35 seenivasan
+#     V1.0.0 Fri Oct 22 2021 11:24:35 seenivasan
 #       Module created
 ############################################################################*/
 
 const jwt = require('jsonwebtoken');
 var request = require('request');
-const constants = require('./constants');
+const constants = require('../misc/constants');
 
 
-module.exports = function(app) {
-    app.post('/login2',  verifyAccount, function(req, res) {
-    
-    const user = req.query
-    
-    jwt.sign({user}, constants.KEY_SECRET, {expiresIn: '1800s'}, (err, token) => {
-            if(token)
-            {
-                var apidata = JSON.parse(req.apidata);
-                var apires = apidata.results;
-                var resdict = {};
-                for(var key in apires)
-                {
-                    resdict[key] = apires[key];
-                }
-                resdict["token"] = token;
-                res.status(200).send(resdict); 
-            }
-            else
-            {
-                res.status(500).send("Token creation failed");
-            }
-        });
-    });   
-}
-
-
-function verifyAccount(req, res, next){
-
+exports.getLogin = (req, res) => {
     const { uname, pwd } = req.query;
     
     if(!uname || !pwd)
@@ -65,7 +37,7 @@ function verifyAccount(req, res, next){
     else
     {
         var options = {
-            url: 'http://localhost:8082/login',
+            url: 'http://localhost:8891/plogin',
             method: 'POST', 
             headers: {'Content-Type': 'application/json' },
             form: {'uname':uname,'pwd':pwd }
@@ -74,19 +46,19 @@ function verifyAccount(req, res, next){
         request(options, function(error, resp) {
             if(error)
             {
-                res.status(500).send('connect to application failed!');
+                res.status(500).send('connect to DNC Server failed!');
             }
             else
             {
+                //console.log("Reply received from Plugin")
                 if(resp.statusCode == 200)
                 {
                     req.apidata = resp.body;
-                    next();
+                    addToken(req, res)
                 }
                 else
                 {
-                    //console.error(resp.body)
-                    res.sendStatus(401);
+                    res.status(401).send(resp.body);
                 }
             }
         });
@@ -94,5 +66,25 @@ function verifyAccount(req, res, next){
 }
 
 
+function addToken(req, res) {
+    const user = req.query
 
-
+    jwt.sign({user}, constants.KEY_SECRET, {expiresIn: '1800s'}, (err, token) => {
+        if(token)
+        {
+            var apidata = JSON.parse(req.apidata);
+            var apires = apidata.results;
+            var resdict = {};
+            for(var key in apires)
+            {
+                resdict[key] = apires[key];
+            }
+            resdict["token"] = token;
+            res.status(200).send(resdict); 
+        }
+        else
+        {
+            res.status(500).send("Token creation failed");
+        }
+    }); 
+}

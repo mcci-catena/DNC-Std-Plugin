@@ -3,7 +3,7 @@
 # Module: version.js
 #
 # Description:
-#     API responds for the SW version request
+#     Endpoint for showing version
 #
 # Copyright notice:
 #     This file copyright (c) 2021 by
@@ -18,14 +18,12 @@
 #     Seenivasan V, MCCI Corporation February 2021
 #
 # Revision history:
-#     V1.0.1 MON Sep 13 2021 11:24:35 seenivasan
+#     V1.0.0 Fri Oct 22 2021 11:24:35 seenivasan
 #       Module created
 ############################################################################*/
 
-const appconst = require('./misc/constants.js');
+const appconst = require('./constants');
 
-module.exports = function (app) {
-    app.get('/version', function(req, res) {
-        res.status(200).json(""+appconst.APP_NAME+" v"+appconst.APP_VERSION);
-    });
+exports.getVersion = (req, res) => {
+    res.status(200).json(""+appconst.APP_NAME+" v"+appconst.APP_VERSION);
 }

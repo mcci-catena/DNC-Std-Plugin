@@ -22,16 +22,103 @@
 #       Module created
 ############################################################################*/
 
+// sread - Read Sensor data
+// sdata - Name of the sensor data
+// device - ID of the requested device
+// gbt   - Group By Time (in minutes)
+// fmdate - From Date
+// todate - to Date
+// aggfn  - Aggregate function (mean, min, max, all)
+
+
 const request = require('request');
 const tokenfn = require('./auth.js');
 const validfn = require('./validators.js');
 const readsens = require('./influx.js');
 const { response } = require('express');
 
+
 module.exports = function (app) {
-    app.get('/dread', tokenfn.authenticateJWT ,(req, res) => {
-        if(!req.query.site || !req.query.pile || !req.query.location || 
-            !req.query.fmdate || !req.query.todate || !req.query.fncode) {
+    app.get('/sread', (req, res) => {
+        if(!req.query.sdata || !req.query.device || !req.query.gbt || 
+            !req.query.fmdate || !req.query.todate || !req.query.aggfn) {
+            return res.status(400).send({
+                message: "mandatory field missing"
+            });
+        }
+        var fmdate = req.query.fmdate.trim();
+        var todate = req.query.todate.trim();
+
+        if(!validfn.validatedate(fmdate) || !validfn.validatedate(todate))
+        {
+            return res.status(400).send({
+                message: "Invalid date input!"
+            });
+        }
+
+        const fmdttime = new Date(fmdate).setHours(00,00,00);
+        const todttime = new Date(todate).setHours(23,59,59);
+
+        if(fmdttime > todttime)
+        {
+            return res.status(400).send({
+                message: "from date is recent to the to date!"
+            });
+        }
+
+        fetchFromInflux(req, res, fmdttime, todttime); 
+
+    });
+}
+
+
+async function fetchFromInflux(req, res, fmdate, todate)
+{
+    var influxset = {};
+
+    var datefm = new Date(fmdate);
+    var dateto = new Date(todate);
+    
+    influxset.server = "http://influxdb:8086";
+    influxset.db = "csrb_activity_db";
+    influxset.measure = "csrbfedsActivityDataNetTime";
+    influxset.fncode = "";
+    influxset.user = "seenivasanv"
+    influxset.pass = "vvasan"
+
+    influxset.fmdate = datefm;
+    influxset.todate = dateto;
+
+    influxset.sdata = req.query.sdata
+    influxset.device = req.query.device
+    influxset.gbt = req.query.gbt
+
+    console.log("Fetch From Influx")
+    
+    try{
+        influxdata = await readsens.readInflux(influxset)
+        if(influxdata != 'error')
+        {
+            //console.log(influxdata);
+            res.status(200).send({"results": [influxdata]});
+        }
+        else
+        {
+            res.status(200).send({"message": "Data Read error"});
+        }
+
+    }catch(err){
+        return res.status(200).send({
+            message: "Data not available for the sensor"
+        });
+    }
+}
+
+
+/*module.exports = function (app) {
+    app.get('/tread', tokenfn.authenticateJWT ,(req, res) => {
+        if(!req.query.sdata || !req.query.device || !req.query.gbt || 
+            !req.query.fmdate || !req.query.todate || !req.query.aggfn) {
             return res.status(400).send({
                 message: "mandatory field missing"
             });
@@ -84,7 +171,7 @@ module.exports = function (app) {
                     {
                         if(dout.hasOwnProperty("devices"))
                         {
-                            fetchFromInflux(res, resp.body, req.query.fncode, fmdttime, todttime); 
+                            fetchFromInflux(res, resp.body, req.query.aggfn, fmdttime, todttime); 
                         }
                         else
                         {
@@ -111,10 +198,11 @@ module.exports = function (app) {
         });
     });
 }
+*/
 
 
 
-async function fetchFromInflux(res, data, fncode, fmdate, todate)
+async function fetchFromInflux1(res, data, aggfn, fmdate, todate)
 {
     var valarray = [];
     var finalarray = [];
@@ -134,7 +222,7 @@ async function fetchFromInflux(res, data, fncode, fmdate, todate)
     influxset.server = dout.server;
     influxset.db = dout.db;
     influxset.measure = dout.measure;
-    influxset.fncode = fncode;
+    influxset.fncode = aggfn;
 
     resultdict["Site"] = dout.site;
     resultdict["Pile"] = dout.pile;

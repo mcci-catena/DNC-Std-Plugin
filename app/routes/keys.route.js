@@ -1,9 +1,9 @@
 /*############################################################################
 # 
-# Module: version.js
+# Module: keys.route.js
 #
 # Description:
-#     API responds for the SW version request
+#     Route declaration for InfluxDB measurement , Tag key and Tag value 
 #
 # Copyright notice:
 #     This file copyright (c) 2021 by
@@ -18,14 +18,17 @@
 #     Seenivasan V, MCCI Corporation February 2021
 #
 # Revision history:
-#     V1.0.1 MON Sep 13 2021 11:24:35 seenivasan
+#     V1.0.0 Fri Oct 22 2021 11:24:35 seenivasan
 #       Module created
 ############################################################################*/
 
-const appconst = require('./misc/constants.js');
+const keyctrl = require('../controllers/keys.controller');
 
-module.exports = function (app) {
-    app.get('/version', function(req, res) {
-        res.status(200).json(""+appconst.APP_NAME+" v"+appconst.APP_VERSION);
-    });
+module.exports = (app) => {
+
+    app.post('/dbs', keyctrl.getdbs);
+    app.post('/meas/:dbn', keyctrl.getmeas);
+    app.post('/fields', keyctrl.getfields);
+    app.post('/tags', keyctrl.gettags);
+    app.post('/tvals/:tkey', keyctrl.gettvals);
 }
