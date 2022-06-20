@@ -37,7 +37,7 @@ exports.getLogin = (req, res) => {
     else
     {
         var options = {
-            url: 'http://localhost:8891/plogin',
+            url: constants.DNC_URL+"plogin",
             method: 'POST', 
             headers: {'Content-Type': 'application/json' },
             form: {'uname':uname,'pwd':pwd }

@@ -29,7 +29,7 @@ module.exports = Object.freeze({
 
     KEY_SECRET: 'mcciradweindiauspvp',
 
-    BASE_URL: "http://influxdb:8086/",
+    IFDB_URL: "http://influxdb:8086/",
     DNC_URL: "http://localhost:8891/",
 
     // Status Codes
