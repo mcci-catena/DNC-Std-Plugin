@@ -23,7 +23,6 @@
 ############################################################################*/
 
 const verctrl = require('../misc/version');
-const clientctrl = require('../controllers/client.controller')
 const loginctrl = require('../controllers/login.controller')
 const readctrl = require('../controllers/sread.controller')
 const dncctrl = require('../controllers/dnc.controller')
@@ -32,7 +31,6 @@ const tokenfn = require('../misc/auth');
 
 module.exports = (app) => {
     app.get('/version', verctrl.getVersion);
-    app.get('/client', tokenfn.authenticateJWT, clientctrl.getClient); // Read data of a Client
     app.post('/login', loginctrl.getLogin);   // Client login
     app.get('/sread', tokenfn.authenticateJWT, readctrl.readData);    // Read Sensor Data
     app.post('/devices', tokenfn.authenticateJWT, dncctrl.getDevices); 
