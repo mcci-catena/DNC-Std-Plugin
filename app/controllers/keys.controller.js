@@ -23,6 +23,7 @@
 ############################################################################*/
 
 const request = require('request');
+const constants = require('../misc/constants.js');
 
 const readsens = require('./influx.controller.js');
 
@@ -73,33 +74,37 @@ exports.getmeas = async (req, res) => {
 
 exports.getfields = async (req, res) => {
     
-    if(!req.query.db || !req.query.meas)
+    if(!req.query.client)
     {
         return res.status(400).send({
-            message: "Mandatory field missing"
+            message: "Clint name missing"
         });
     }
 
-    var indict = {}
-    indict["db"] = req.query.db
-    indict["meas"] = req.query.meas
-    indict["cmd"] = "show field keys"
+    var options = {
+        url: constants.DNC_URL+"gfields",
+        method: 'POST', // Don't forget this line
+        headers: {'Content-Type': 'application/json' },
+        form: {'cname':req.query.client}
+    };
 
-    try{
-        influxdata = await readsens.readKeys(indict)
-        if(influxdata != 'error')
+    request(options, function(error,resp) {
+        if(error)
         {
-            return res.status(200).send({
-                fields: influxdata.data
-            });
-           
+            res.status(500).send('connect to application failed!');
         }
-
-    }catch(err){
-        return res.status(200).send({
-            message: "Data not available for the sensor"
-        });
-    }
+        else
+        {
+            if(resp.statusCode == 200)
+            {
+                res.status(200).send(resp.body)
+            }
+            else
+            {
+                res.status(500).send(resp.body);
+            }
+        }
+    });
 }
 
 exports.gettags = async (req, res) => {
