@@ -26,12 +26,11 @@ const request = require('request');
 
 exports.readDBs = () => {
     return new Promise(function(resolve, reject) {
-        server = "http://influxdb:8086"
+        server = constants.IFDB_URL
         query = ""+server+"/query?q=show+databases"
-        //query = "http://influxdb:8086/query?q=show+databases"
-
+        
         request.get(query,
-            {'auth': {'user': 'seenivasanv', 'pass': 'vvasan', 'sendImmediately': false } },
+            {'auth': {'user': '', 'pass': '', 'sendImmediately': false } },
             function(error, response)
             {
                 if(error)
@@ -84,11 +83,11 @@ exports.readDBs = () => {
 
 exports.readMeas = (infcmd, dbname) => {
     return new Promise(function(resolve, reject) {
-        server = "http://influxdb:8086"
+        server = constants.IFDB_URL
         query = ""+server+"/query?db="+dbname+"&q="+infcmd
 
         request.get(query,
-            {'auth': {'user': 'seenivasanv', 'pass': 'vvasan', 'sendImmediately': false } },
+            {'auth': {'user': '', 'pass': '', 'sendImmediately': false } },
             function(error, response)
             {
                 if(error)
@@ -137,17 +136,11 @@ exports.readMeas = (infcmd, dbname) => {
 
 exports.readKeys  = (indict) => {
     return new Promise(function(resolve, reject) {
-        //var query = "show field keys from csrbfedsActivityDataNetTime"
-        /*query = "https://staging-dashboard.mouserat.io/influxdb:8086/query?db=csrb_activity_db"+
-                "&q=show+field+keys+from+csrbfedsActivityDataNetTime"*/
-        //query = "http://influxdb:8086/query?db=csrb_activity_db"+
-        //        "&q="+keycmd+" from csrbfedsActivityDataNetTime"
-
-        server = "http://influxdb:8086"
+        server = constants.IFDB_URL
         query = ""+server+"/query?db="+indict.db+"&q="+indict.cmd+" from "+indict.meas
 
         request.get(query,
-        {'auth': {'user': 'seenivasanv', 'pass': 'vvasan', 'sendImmediately': false } },
+        {'auth': {'user': '', 'pass': '', 'sendImmediately': false } },
         function(error, response)
         {
             if(error)
@@ -195,16 +188,11 @@ exports.readKeys  = (indict) => {
 
 exports.readTvals  = (indict) => {
     return new Promise(function(resolve, reject) {
-    //var query = "show field keys from csrbfedsActivityDataNetTime"
-    /*query = "https://staging-dashboard.mouserat.io/influxdb:8086/query?db=csrb_activity_db"+
-                "&q=show+field+keys+from+csrbfedsActivityDataNetTime"*/
-    //query = "http://influxdb:8086/query?db=csrb_activity_db"+
-    //            "&q="+keycmd+" from csrbfedsActivityDataNetTime with key="+keyname
-    server = "http://influxdb:8086"
+    server = constants.IFDB_URL
     query = ""+server+"/query?db="+indict.db+"&q="+indict.cmd+" from "+indict.meas+" with key="+indict.tkey
 
     request.get(query,
-        {'auth': {'user': 'seenivasanv', 'pass': 'vvasan', 'sendImmediately': false } },
+        {'auth': {'user': '', 'pass': '', 'sendImmediately': false } },
         function(error, response)
         {
             if(error)
@@ -216,7 +204,6 @@ exports.readTvals  = (indict) => {
                 try
                 {
                     var dout = JSON.parse(response.body)
-                    console.log("Dut:", dout)
                     if(dout.hasOwnProperty("results"))
                     {
                         resobj = dout.results[0]
@@ -252,8 +239,6 @@ exports.readTvals  = (indict) => {
 
 exports.readInflux = (indata) => {
     return new Promise(function(resolve, reject) {
-        
-        console.log("Read Influx Entry")
         
         const count = indata.id;
 

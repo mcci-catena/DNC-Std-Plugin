@@ -35,7 +35,7 @@ const request = require('request');
 const validfn = require('../misc/validators.js');
 const readsens = require('./influx.controller.js');
 const { response } = require('express');
-
+const constants = require('../misc/constants.js');
 
 exports.readData = (req, res)  => {
     if(!req.query.db || !req.query.meas || !req.query.sdata || !req.query.device || !req.query.gbt || 
@@ -76,13 +76,13 @@ async function fetchFromInflux(req, res, fmdate, todate)
     var datefm = new Date(fmdate);
     var dateto = new Date(todate);
     
-    influxset.server = "http://influxdb:8086";
+    influxset.server = constants.IFDB_URL;
     influxset.db = req.query.db;
     influxset.measure = req.query.meas;
     
     influxset.fncode = "";
-    influxset.user = "**********"
-    influxset.pass = "****"
+    influxset.user = ""
+    influxset.pass = ""
 
     influxset.fmdate = datefm;
     influxset.todate = dateto;
@@ -99,7 +99,6 @@ async function fetchFromInflux(req, res, fmdate, todate)
         var newstr = mathstr.replace("+", "%2B")
         influxset.math = newstr
     }
-
     
     try{
         influxdata = await readsens.readInflux(influxset)
