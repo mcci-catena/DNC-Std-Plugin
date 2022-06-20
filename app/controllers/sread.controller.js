@@ -38,24 +38,35 @@ const { response } = require('express');
 const constants = require('../misc/constants.js');
 
 exports.readData = (req, res)  => {
-    if(!req.query.db || !req.query.meas || !req.query.sdata || !req.query.device || !req.query.gbt || 
+    if(!req.query.client || !req.query.sdata || !req.query.device || !req.query.gbt || 
         !req.query.fmdate || !req.query.todate || !req.query.aggfn) {
         return res.status(400).send({
             message: "mandatory field missing"
         });
     }
-    var fmdate = req.query.fmdate.trim();
-    var todate = req.query.todate.trim();
 
-    if(!validfn.validatedate(fmdate) || !validfn.validatedate(todate))
+    var fmdttm = req.query.fmdate.replace("T",",");
+    var todttm = req.query.todate.replace("T",",");
+
+    var fmdttmstr = req.query.fmdate.split("T")
+    var todttmstr = req.query.todate.split("T")
+
+    var fmdate = fmdttmstr[0].trim();
+    var fmtime = fmdttmstr[1].trim();
+    var todate = todttmstr[0].trim();
+    var totime = todttmstr[1].trim();
+
+    if(!validfn.validatedate(fmdate) || !validfn.validatedate(todate) || 
+       !validfn.validatetime(fmtime) || !validfn.validatetime(totime))
     {
         return res.status(400).send({
             message: "Invalid date input!"
         });
     }
 
-    const fmdttime = new Date(fmdate).setHours(00,00,00);
-    const todttime = new Date(todate).setHours(23,59,59);
+    const fmdttime = new Date(fmdttm)
+    const todttime = new Date(todttm)
+
 
     if(fmdttime > todttime)
     {
@@ -64,7 +75,39 @@ exports.readData = (req, res)  => {
         });
     }
 
-    fetchFromInflux(req, res, fmdttime, todttime); 
+    // Read HWID of the selected DNC Tags from deviceCID collection
+    // Read the corresponding devID/devEUI for the equivalent HWID
+
+    var options = {
+        url: constants.DNC_URL+"gdevmap",
+        method: 'POST', // Don't forget this line
+        headers: {'Content-Type': 'application/json' },
+        // form: {'cname':req.query.client, 'tagval': req.query.device, 'fmdate': fmdttime, 'todate': todttime}
+        form: {'cname':req.query.client, 'tagval': req.query.device}
+        //form: {'cname':req.query.cname}
+    };
+
+    request(options, function(error,resp) {
+        if(error)
+        {
+            res.status(500).send('connect to application failed!');
+        }
+        else
+        {
+            if(resp.statusCode == 200)
+            {
+                var dout = JSON.parse(resp.body)
+                req.query.device = dout.devices[0]
+                req.query.db = dout.dbname
+                req.query.meas = dout.measname
+                fetchFromInflux(req, res, fmdttime, todttime); 
+            }
+            else
+            {
+                res.status(500).send(resp.body);
+            }
+        }
+    });
 
 }
 

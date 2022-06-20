@@ -244,7 +244,33 @@ exports.readInflux = (indata) => {
 
         var aggfn = "\""+ indata.sdata+"\""
 
-        var devid = "devID+=+'"+indata.device+"'"
+        let devid = "("
+        orflg = 0
+
+        if(indata.device.deviceid != "")
+        {
+            devid = devid+"deviceid+=+'"+indata.device.deviceid+"'"
+            orflg = 1
+        }
+        if(indata.device.devID != "")
+        {
+            if(orflg)
+            {
+                devid = devid+"+or+"
+            }
+            devid = devid+"devID+=+'"+indata.device.devID+"'"
+            orflg = 1
+        }
+        if(indata.device.devEUI != "")
+        {
+            if(orflg)
+            {
+                devid = devid+"+or+"
+            }
+            devid = devid+"devEUI+=+'"+indata.device.devEUI+"'"
+        }
+        devid = devid + ")"
+
 
         var fmdtstr = indata.fmdate.toISOString();
         var todtstr = indata.todate.toISOString();
@@ -268,12 +294,10 @@ exports.readInflux = (indata) => {
                     try
                     {
                         var dout = JSON.parse(response.body)
-                        console.log(dout)
                         if(dout.hasOwnProperty("results"))
                         { 
                             resobj = dout.results[0]
-                            console.log(resobj)
-
+                            
                             if(resobj.hasOwnProperty("series"))
                             {
                                 var resdict = {};
