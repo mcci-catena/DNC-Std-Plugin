@@ -27,7 +27,7 @@ const request = require('request');
 exports.readDBs = () => {
     return new Promise(function(resolve, reject) {
         server = constants.IFDB_URL
-        query = ""+server+"/query?q=show+databases"
+        query = ""+server+"query?q=show+databases"
         
         request.get(query,
             {'auth': {'user': '', 'pass': '', 'sendImmediately': false } },
@@ -84,7 +84,7 @@ exports.readDBs = () => {
 exports.readMeas = (infcmd, dbname) => {
     return new Promise(function(resolve, reject) {
         server = constants.IFDB_URL
-        query = ""+server+"/query?db="+dbname+"&q="+infcmd
+        query = ""+server+"query?db="+dbname+"&q="+infcmd
 
         request.get(query,
             {'auth': {'user': '', 'pass': '', 'sendImmediately': false } },
@@ -137,7 +137,7 @@ exports.readMeas = (infcmd, dbname) => {
 exports.readKeys  = (indict) => {
     return new Promise(function(resolve, reject) {
         server = constants.IFDB_URL
-        query = ""+server+"/query?db="+indict.db+"&q="+indict.cmd+" from "+indict.meas
+        query = ""+server+"query?db="+indict.db+"&q="+indict.cmd+" from "+indict.meas
 
         request.get(query,
         {'auth': {'user': '', 'pass': '', 'sendImmediately': false } },
@@ -189,7 +189,7 @@ exports.readKeys  = (indict) => {
 exports.readTvals  = (indict) => {
     return new Promise(function(resolve, reject) {
     server = constants.IFDB_URL
-    query = ""+server+"/query?db="+indict.db+"&q="+indict.cmd+" from "+indict.meas+" with key="+indict.tkey
+    query = ""+server+"query?db="+indict.db+"&q="+indict.cmd+" from "+indict.meas+" with key="+indict.tkey
 
     request.get(query,
         {'auth': {'user': '', 'pass': '', 'sendImmediately': false } },

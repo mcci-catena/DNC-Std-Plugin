@@ -98,8 +98,7 @@ exports.readData = (req, res)  => {
             {
                 var dout = JSON.parse(resp.body)
                 req.query.device = dout.devices[0]
-                req.query.db = dout.dbname
-                req.query.meas = dout.measname
+                req.query.dbdata = dout.dbdata
                 fetchFromInflux(req, res, fmdttime, todttime); 
             }
             else
@@ -119,13 +118,13 @@ async function fetchFromInflux(req, res, fmdate, todate)
     var datefm = new Date(fmdate);
     var dateto = new Date(todate);
     
-    influxset.server = constants.IFDB_URL;
-    influxset.db = req.query.db;
-    influxset.measure = req.query.meas;
+    influxset.server = req.query.dbdata.url;
+    influxset.db = req.query.dbdata.dbname;
+    influxset.measure = req.query.dbdata.mmtname;
     
     influxset.fncode = "";
-    influxset.user = ""
-    influxset.pass = ""
+    influxset.user = req.query.dbdata.user
+    influxset.pass = req.query.dbdata.pwd
 
     influxset.fmdate = datefm;
     influxset.todate = dateto;
