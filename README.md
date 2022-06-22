@@ -4,6 +4,13 @@ It is a REST API, designed to enable the user to use the DNC features for access
 
 ## Release History
 
+- v1.1.0 has the following changes:
+  - Hour selector included in the data read Endpoint
+  - Data read Endpoint updated
+  - Device list Endpoint updated with DNC devie mapping
+  - Make all request specific to client 
+  - Removed unwanted modules
+
 - v1.0.0 Initial release:
   - Login Endpoint
   - Device database and measurement and field Endpoints
