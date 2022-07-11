@@ -101,7 +101,7 @@ exports.getfields = async (req, res) => {
             }
             else
             {
-                res.status(500).send(resp.body);
+                res.status(201).send({error: 'Missing DNC Client Parameters'});
             }
         }
     });
