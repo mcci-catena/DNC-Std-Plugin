@@ -137,7 +137,7 @@ exports.readMeas = (infcmd, dbname) => {
 exports.readKeys  = (indict) => {
     return new Promise(function(resolve, reject) {
         server = constants.IFDB_URL
-        query = ""+server+"query?db="+indict.db+"&q="+indict.cmd+" from "+indict.meas
+        query = ""+server+"query?db="+indict.db+"&q="+indict.cmd+" from "+"\""+indict.meas+"\""
 
         request.get(query,
         {'auth': {'user': '', 'pass': '', 'sendImmediately': false } },
@@ -189,7 +189,7 @@ exports.readKeys  = (indict) => {
 exports.readTvals  = (indict) => {
     return new Promise(function(resolve, reject) {
     server = constants.IFDB_URL
-    query = ""+server+"query?db="+indict.db+"&q="+indict.cmd+" from "+indict.meas+" with key="+indict.tkey
+    query = ""+server+"query?db="+indict.db+"&q="+indict.cmd+" from "+"\""+indict.meas+"\""+" with key="+indict.tkey
 
     request.get(query,
         {'auth': {'user': '', 'pass': '', 'sendImmediately': false } },
@@ -277,7 +277,7 @@ exports.readInflux = (indata) => {
 
         query = ""+indata.server+"/query?db="+indata.db+
                 "&q=select+mean("+aggfn+")+"+indata.math+"+from+"+
-                indata.measure+"+where+"+devid+"+and+time+>=+'"+fmdtstr+
+                "\""+indata.measure+"\""+"+where+"+devid+"+and+time+>=+'"+fmdtstr+
                 "'+and+time+<=+'"+todtstr+"'+group+by+time("+indata.gbt+"m)"
 
         request.get(query,
