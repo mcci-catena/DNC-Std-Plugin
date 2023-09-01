@@ -131,6 +131,7 @@ async function fetchFromInflux(req, res, fmdate, todate)
 
     influxset.sdata = req.query.sdata
     influxset.device = req.query.device
+    influxset.aggfn = req.query.aggfn
     influxset.gbt = req.query.gbt
 
 

@@ -24,7 +24,7 @@
 
 module.exports = Object.freeze({
     APP_NAME: 'Excel Plugin API',
-    APP_VERSION: '1.1.2',
+    APP_VERSION: '1.1.3',
     APP_PORT: 8892,
 
     KEY_SECRET: 'mcciradweindiauspvp',

@@ -242,7 +242,7 @@ exports.readInflux = (indata) => {
         
         const count = indata.id;
 
-        var aggfn = "\""+ indata.sdata+"\""
+        var pname = "\""+ indata.sdata+"\""  // parameter
 
         let devid = "("
         orflg = 0
@@ -276,7 +276,7 @@ exports.readInflux = (indata) => {
         var todtstr = indata.todate.toISOString();
 
         query = ""+indata.server+"/query?db="+indata.db+
-                "&q=select+mean("+aggfn+")+"+indata.math+"+from+"+
+                "&q=select+"+indata.aggfn+"("+pname+")+"+indata.math+"+from+"+
                 "\""+indata.measure+"\""+"+where+"+devid+"+and+time+>=+'"+fmdtstr+
                 "'+and+time+<=+'"+todtstr+"'+group+by+time("+indata.gbt+"m)"
 
