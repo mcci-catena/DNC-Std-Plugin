@@ -4,6 +4,9 @@ It is a REST API, designed to enable the user to use the DNC features for access
 
 ## Release History
 
+- v1.1.4 has the following changes:
+  - Adding support for querying multiple field tags [#16](https://github.com/mcci-catena/DNC-Std-Plugin/commit/0de7349c63f763edbf7af23dbb8f55f2e5f45529)
+
 - v1.1.3 has the following changes:
   - Aggregate option not working [#15](https://github.com/mcci-catena/DNC-Std-Plugin/commit/741308b73a2a1c0e0c1f50f71e721835e91d72e1)
 
