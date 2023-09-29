@@ -242,7 +242,15 @@ exports.readInflux = (indata) => {
         
         const count = indata.id;
 
-        var pname = "\""+ indata.sdata+"\""  // parameter
+        var paramarr = indata.sdata.split(",")
+
+        var selparam = ""
+        for(let i=0; i<paramarr.length; i++){
+            selparam = selparam + indata.aggfn+"("+paramarr[i]+")"
+            if(paramarr.length > (i+1)){
+                selparam = selparam + ","
+            }
+        }
 
         let devid = "("
         orflg = 0
@@ -276,7 +284,7 @@ exports.readInflux = (indata) => {
         var todtstr = indata.todate.toISOString();
 
         query = ""+indata.server+"/query?db="+indata.db+
-                "&q=select+"+indata.aggfn+"("+pname+")+"+indata.math+"+from+"+
+                "&q=select+"+selparam+"+"+indata.math+"+from+"+
                 "\""+indata.measure+"\""+"+where+"+devid+"+and+time+>=+'"+fmdtstr+
                 "'+and+time+<=+'"+todtstr+"'+group+by+time("+indata.gbt+"m)"
 
