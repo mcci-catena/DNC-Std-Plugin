@@ -37,7 +37,7 @@ const readsens = require('./influx.controller.js');
 const { response } = require('express');
 const constants = require('../misc/constants.js');
 
-exports.readData = (req, res)  => {
+exports.readData = async (req, res)  => {
     if(!req.query.client || !req.query.sdata || !req.query.device || !req.query.gbt || 
         !req.query.fmdate || !req.query.todate || !req.query.aggfn) {
         return res.status(400).send({
@@ -78,13 +78,17 @@ exports.readData = (req, res)  => {
     // Read HWID of the selected DNC Tags from deviceCID collection
     // Read the corresponding devID/devEUI for the equivalent HWID
 
+    var dncd = {}
+    dncd["orgname"] = req.query.client
+    dncd["time"] = [fmdttime, todttime]
+    dncd["tags"] = {}
+
+
     var options = {
-        url: constants.DNC_URL+"gdevmap",
-        method: 'POST', // Don't forget this line
+        url: constants.DNC_URL+"tagsk",
+        method: 'POST', 
         headers: {'Content-Type': 'application/json' },
-        // form: {'cname':req.query.client, 'tagval': req.query.device, 'fmdate': fmdttime, 'todate': todttime}
-        form: {'cname':req.query.client, 'tagval': req.query.device}
-        //form: {'cname':req.query.cname}
+        form: {'influxd': {'uname': req.query.client}}
     };
 
     request(options, function(error,resp) {
@@ -97,66 +101,152 @@ exports.readData = (req, res)  => {
             if(resp.statusCode == 200)
             {
                 var dout = JSON.parse(resp.body)
-                req.query.device = dout.devices[0]
-                req.query.dbdata = dout.dbdata
-                fetchFromInflux(req, res, fmdttime, todttime); 
+                var dnctags = dout.message
+                var tagvals = req.query.device.split(',')
+                
+                var dncdict = {}
+                for(let i=0; i<dnctags.length; i++){
+                    dncd.tags[dnctags[i]] = tagvals[i].trim()
+                }
+
+                // Send request to get device map
+                var options = {
+                    url: constants.DNC_URL+"gdlist",
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json' },
+                    form: {'dncd': dncd}
+                };
+
+
+                request(options, async function(error,resp) {
+                    if(error)
+                    {
+                        res.status(500).send('connect to application failed!');
+                    }
+                    else
+                    {
+                        if(resp.statusCode == 200)
+                        {
+                            var dout = JSON.parse(resp.body)
+                            
+                            let sdpromisearr = []
+
+                            for(let i=0; i<dout.message.devices.length; i++){
+                                
+                                let ifdict = {}
+                                ifdict['device'] = dout.message.devices[i]['devid']
+                                ifdict['type'] = dout.message.devices[i]['devtype']
+                                ifdict['sdata'] = req.query.sdata
+                                ifdict['aggfn'] = req.query.aggfn
+                                ifdict['gbt'] = req.query.gbt
+                                
+                                let timespan = maptimespan(dncd["time"], [dout.message.devices[i]['idate'],
+                                                            dout.message.devices[i]['rdate']])
+                                ifdict['fmdate'] = timespan[0]
+                                ifdict['todate'] = timespan[1]
+                                if(dout.message.devices[i]['rdate'] == null){
+                                    ifdict['todate'] = dout.message.time[1]  
+                                }
+                                ifdict['aggfn'] = req.query.aggfn
+                                ifdict['db'] =  dout.message.dsrc[dout.message.devices[i].dsid]
+
+                                ifdict['math'] = ''
+                                if(req.query.math){
+                                    var mathstr = req.query.math
+                                    var newstr = mathstr.replace("+", "%2B")
+                                    ifdict['math'] = newstr
+                                }
+
+                                sdpromisearr.push(readsens.readInflux(ifdict))
+                            }
+
+                            const sdpromises = Promise.allSettled(sdpromisearr)
+                            const dstatuses = await sdpromises
+
+                            let gresult = []
+                            for(let rstatus of dstatuses){
+                                if(rstatus.status == 'fulfilled'){
+                                    gresult.push(rstatus.value)
+                                }
+                                else{
+                                    console.log("Data fetch not success: ", rstatus.reason)
+                                }
+                            }
+
+                            const finalresult = {
+                                Columns: gresult[0].Columns,
+                                Values: []
+                            }
+
+                            for(let i=0; i<gresult.length; i++){
+                                if(gresult.length > (i+1)){
+                                    let d1len = gresult[i].Values.length
+                                    let d1date = gresult[i].Values[d1len-1]
+                                
+                                    let d2date = gresult[i+1].Values[0]
+
+                                    if(d1date[0] === d2date[0]){
+                                        if(d1date[1] === null && d2date[1] === null){
+                                            gresult[i].Values.pop()
+                                        }
+                                        else
+                                        if(d1date[1] != null && d2date[1] != null){
+                                            gresult[i].Values.pop()
+                                        }
+                                        else
+                                        if(d1date[1] === null){
+                                            gresult[i].Values.pop()
+                                        }
+                                        else{
+                                            gresult[i+1].Values.shift()
+                                        }
+                                    }
+                                }
+                                finalresult.Values = finalresult.Values.concat(gresult[i].Values)
+                            }
+
+                            res.status(200).send({"results": [finalresult]});
+                        
+                        }
+                        else
+                        {
+                            res.status(200).send({"message": "Data Read error"});
+                        }
+                    }
+                });
+
+
             }
             else
             {
-                res.status(500).send(resp.body);
+                console.log("Tag Key Receive failed")
+                return res.status(200).send({
+                    message: "Data not available for the sensor"
+                });
             }
         }
     });
-
 }
 
 
-async function fetchFromInflux(req, res, fmdate, todate)
-{
-    var influxset = {};
+function maptimespan(reqtime, devtime){
+    let fmdate = reqtime[0]
+    let todate = reqtime[1]
 
-    var datefm = new Date(fmdate);
-    var dateto = new Date(todate);
-    
-    influxset.server = req.query.dbdata.url;
-    influxset.db = req.query.dbdata.dbname;
-    influxset.measure = req.query.dbdata.mmtname;
-    
-    influxset.fncode = "";
-    influxset.user = req.query.dbdata.user
-    influxset.pass = req.query.dbdata.pwd
+    let idate = new Date(devtime[0]);
+    let rdate = devtime[1] == null ? todate : new Date(devtime[1])
 
-    influxset.fmdate = datefm;
-    influxset.todate = dateto;
+    let influxfmdt = idate, influxtodt = rdate;
 
-    influxset.sdata = req.query.sdata
-    influxset.device = req.query.device
-    influxset.aggfn = req.query.aggfn
-    influxset.gbt = req.query.gbt
-
-
-    influxset.math = "";
-    if(req.query.math)
+    if(idate.getTime() < fmdate.getTime())
     {
-        var mathstr = req.query.math
-        var newstr = mathstr.replace("+", "%2B")
-        influxset.math = newstr
+        influxfmdt = fmdate; 
     }
-    
-    try{
-        influxdata = await readsens.readInflux(influxset)
-        if(influxdata != 'error')
-        {
-            res.status(200).send({"results": [influxdata]});
-        }
-        else
-        {
-            res.status(200).send({"message": "Data Read error"});
-        }
+    if(rdate.getTime() > todate.getTime())
+    {
+        influxtodt = todate;
+    }
 
-    }catch(err){
-        return res.status(200).send({
-            message: "Data not available for the sensor"
-        });
-    }
+    return [influxfmdt, influxtodt]
+
 }

@@ -29,7 +29,7 @@ const constants = require('../misc/constants');
 
 exports.getLogin = (req, res) => {
     const { uname, pwd } = req.query;
-    
+
     if(!uname || !pwd)
     {
         res.status(406).send("input data missing");
@@ -42,15 +42,15 @@ exports.getLogin = (req, res) => {
             headers: {'Content-Type': 'application/json' },
             form: {'uname':uname,'pwd':pwd }
         };
- 
+
         request(options, function(error, resp) {
             if(error)
             {
+                console.log("Login Error: ", error)
                 res.status(500).send('connect to DNC Server failed!');
             }
             else
             {
-                //console.log("Reply received from Plugin")
                 if(resp.statusCode == 200)
                 {
                     req.apidata = resp.body;

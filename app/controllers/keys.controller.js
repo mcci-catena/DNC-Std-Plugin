@@ -73,7 +73,7 @@ exports.getmeas = async (req, res) => {
 }
 
 exports.getfields = async (req, res) => {
-    
+
     if(!req.query.client)
     {
         return res.status(400).send({
@@ -83,7 +83,7 @@ exports.getfields = async (req, res) => {
 
     var options = {
         url: constants.DNC_URL+"gfields",
-        method: 'POST', // Don't forget this line
+        method: 'POST', 
         headers: {'Content-Type': 'application/json' },
         form: {'cname':req.query.client}
     };

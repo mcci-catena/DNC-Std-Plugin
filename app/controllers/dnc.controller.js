@@ -13,10 +13,11 @@ exports.getDevices = (req, res) => {
 
     var options = {
         url: constants.DNC_URL+"gdevices",
-        method: 'POST', // Don't forget this line
+        method: 'POST', 
         headers: {'Content-Type': 'application/json' },
         form: {'cname':req.query.client}
     };
+    
     request(options, function(error,resp) {
         if(error)
         {

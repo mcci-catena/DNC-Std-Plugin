@@ -240,10 +240,7 @@ exports.readTvals  = (indict) => {
 exports.readInflux = (indata) => {
     return new Promise(function(resolve, reject) {
         
-        const count = indata.id;
-
         var paramarr = indata.sdata.split(",")
-
         var selparam = ""
         for(let i=0; i<paramarr.length; i++){
             selparam = selparam + indata.aggfn+"("+paramarr[i]+")"
@@ -253,43 +250,30 @@ exports.readInflux = (indata) => {
         }
 
         let devid = "("
-        orflg = 0
-
-        if(indata.device.deviceid != "")
+        
+        if(indata.device != "")
         {
-            devid = devid+"deviceid+=+'"+indata.device.deviceid+"'"
-            orflg = 1
+            devid = devid+indata.type+"+=+'"+indata.device+"')"
         }
-        if(indata.device.devID != "")
-        {
-            if(orflg)
-            {
-                devid = devid+"+or+"
-            }
-            devid = devid+"devID+=+'"+indata.device.devID+"'"
-            orflg = 1
+
+        try{
+            var fmdtstr = new Date(indata.fmdate)
+            fmdtstr = fmdtstr.toISOString();
+            var todtstr = new Date(indata.todate)
+            todtstr = todtstr.toISOString();
         }
-        if(indata.device.devEUI != "")
-        {
-            if(orflg)
-            {
-                devid = devid+"+or+"
-            }
-            devid = devid+"devEUI+=+'"+indata.device.devEUI+"'"
+        catch(err){
+            console.log("Date conversion error: ", err)
         }
-        devid = devid + ")"
 
-
-        var fmdtstr = indata.fmdate.toISOString();
-        var todtstr = indata.todate.toISOString();
-
-        query = ""+indata.server+"/query?db="+indata.db+
-                "&q=select+"+selparam+"+"+indata.math+"+from+"+
-                "\""+indata.measure+"\""+"+where+"+devid+"+and+time+>=+'"+fmdtstr+
-                "'+and+time+<=+'"+todtstr+"'+group+by+time("+indata.gbt+"m)"
+     
+        query = ""+indata.db.dburl+"/query?db="+indata.db.dbname+
+            "&q=select+"+selparam+"+"+indata.math+"+from+"+
+            "\""+indata.db.mmtname+"\""+"+where+"+devid+"+and+time+>=+'"+fmdtstr+
+            "'+and+time+<=+'"+todtstr+"'+group+by+time("+indata.gbt+"m)"
 
         request.get(query,
-            {'auth': {'user': indata.user, 'pass': indata.pass, 'sendImmediately': false } },
+            {'auth': {'user': indata.db.uname, 'pass': indata.db.pwd, 'sendImmediately': false } },
             function(error, response)
             {
                 if(error)
@@ -309,14 +293,14 @@ exports.readInflux = (indata) => {
                             if(resobj.hasOwnProperty("series"))
                             {
                                 var resdict = {};
-                                resdict["id"] = count;
+                                // resdict["id"] = count;
                                 resdict["Columns"] = resobj.series[0].columns;
                                 resdict["Values"] = resobj.series[0].values;
                                 resolve(resdict);
                             }
                             else
                             {
-                                console.log("Error-2")
+                                console.log("Error-2: ", resobj)
                                 reject("error");
                             }
                         }
@@ -327,11 +311,11 @@ exports.readInflux = (indata) => {
                         }
                     }
                     catch(err){
-                        console.log("Error-4")
+                        console.log("Error-4: ", err)
                         reject("error");
                     }
                         
                 }
         });
-    });
+    })
 }
