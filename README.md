@@ -3,6 +3,8 @@
 It is a REST API, designed to enable the user to use the DNC features for accessing their device data from the data server. It process all requestes through DNC engine, make queries with device specific and then send back the response to the user.
 
 ## Release History
+- v1.1.5 has the following changes:
+  -  Comments added in all files
 
 - v1.1.4 has the following changes:
   - Adding support for querying multiple field tags [#16](https://github.com/mcci-catena/DNC-Std-Plugin/commit/0de7349c63f763edbf7af23dbb8f55f2e5f45529)
