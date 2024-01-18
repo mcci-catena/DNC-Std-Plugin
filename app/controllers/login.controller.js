@@ -22,10 +22,21 @@
 #       Module created
 ############################################################################*/
 
+// Import the 'jsonwebtoken' module form NPM library
 const jwt = require('jsonwebtoken');
+
+// Import the 'request' module form NPM library
 var request = require('request');
+
+// Import the constants from the 'constants' module
 const constants = require('../misc/constants');
 
+// End point for login into DNC Server application
+// Input parameter - req.query.uname, req.query.pwd
+// Response - If it is admin user - JWT and {"clients": []}
+// contains list of all clients
+// If it is General user - JWT and {"clients": []}
+// Contains a client name associated with the user.
 
 exports.getLogin = (req, res) => {
     const { uname, pwd } = req.query;
@@ -65,6 +76,10 @@ exports.getLogin = (req, res) => {
     }
 }
 
+
+// Once the User credentials are validated
+// this will create the JWT
+// Response - Send JWT with the Client details
 
 function addToken(req, res) {
     const user = req.query

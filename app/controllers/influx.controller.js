@@ -22,7 +22,13 @@
 #       Module created
 ############################################################################*/
 
+// Import the 'request' module form NPM library
 const request = require('request');
+
+// The primary purpose of this module is to execute a query on a specified 
+// database server to retrieve a list of databases.
+// Input parameters : None
+// Response : Dict object {"data": []}
 
 exports.readDBs = () => {
     return new Promise(function(resolve, reject) {
@@ -35,7 +41,6 @@ exports.readDBs = () => {
             {
                 if(error)
                 {
-                    console.log("Read DB E-1")
                     reject("error");
                 }
                 else
@@ -59,19 +64,16 @@ exports.readDBs = () => {
                             }
                             else
                             {
-                                console.log("Read DB E-2")
                                 reject("error");
                             }
                         }
                         else
                         {
-                            console.log("Read DB E-3")
                             reject("error");
                         }
                     }
                     catch(err)
                     {
-                        console.log("Read DB E-4")
                         reject("error");
                     }
                 }
@@ -80,6 +82,12 @@ exports.readDBs = () => {
         
     });
 }
+
+
+// The primary purpose of this module is to execute a query on a specified 
+// database server to retrieve a list of measurements for the given database.
+// Input parameters: "show measurements", database name
+// Response : Dict object {"data": []}
 
 exports.readMeas = (infcmd, dbname) => {
     return new Promise(function(resolve, reject) {
@@ -134,6 +142,13 @@ exports.readMeas = (infcmd, dbname) => {
     });
 }
 
+
+// The primary purpose of this module is to send a query to an InfluxDB server, 
+// execute a specified command, and retrieve keys (field names) from a specific 
+// measurement.
+// Input Parameters: indict.cmd, indict.db, indict.meas
+// Response : Dict object {"data": []}
+
 exports.readKeys  = (indict) => {
     return new Promise(function(resolve, reject) {
         server = constants.IFDB_URL
@@ -186,6 +201,12 @@ exports.readKeys  = (indict) => {
 }
 
 
+// The primary purpose of this module is to send a query to an InfluxDB server,
+// execute a specified command, and retrieve timestamped values associated with a 
+// specific key from a specific measurement.
+// Input parameters: indict.db, indict.cmd, indict.meas, indict.tkey
+// Response: Dict object {"data": []}
+
 exports.readTvals  = (indict) => {
     return new Promise(function(resolve, reject) {
     server = constants.IFDB_URL
@@ -237,13 +258,26 @@ exports.readTvals  = (indict) => {
     });
 }
 
+
+// The primary purpose of this module is to send a query to get devicedata 
+// to an InfluxDB server, and retrieve timestamped values associated with a 
+// specific key and value pairs from a specific measurement for the given 
+// time span.
+// Input parameters: indata.aggfn, indata.fmdate, indata.todate, indata.db
+// indata.measure, indata.server, indata.math, indata.gbt
+// (indata.device.deviceid || indata.device.devID || indata.device.devEUI)
+// Response: Dict object {"Columns": [], "Values": []}
+
 exports.readInflux = (indata) => {
     return new Promise(function(resolve, reject) {
         
         const count = indata.id;
 
+        // Split when user requesting for multiple params
+        // Example vBat, Temp, Pressure, RH, etc
         var paramarr = indata.sdata.split(",")
 
+        // Framing SELECT Clause 
         var selparam = ""
         for(let i=0; i<paramarr.length; i++){
             selparam = selparam + indata.aggfn+"("+paramarr[i]+")"
@@ -252,6 +286,7 @@ exports.readInflux = (indata) => {
             }
         }
 
+        // Choose type of the ID for device (Network based ex. Sigfox, TTN)
         let devid = "("
         orflg = 0
 
@@ -283,24 +318,29 @@ exports.readInflux = (indata) => {
         var fmdtstr = indata.fmdate.toISOString();
         var todtstr = indata.todate.toISOString();
 
+        // Framing complete Influx query
         query = ""+indata.server+"/query?db="+indata.db+
                 "&q=select+"+selparam+"+"+indata.math+"+from+"+
                 "\""+indata.measure+"\""+"+where+"+devid+"+and+time+>=+'"+fmdtstr+
                 "'+and+time+<=+'"+todtstr+"'+group+by+time("+indata.gbt+"m)"
 
+        // Making Influx Request
         request.get(query,
             {'auth': {'user': indata.user, 'pass': indata.pass, 'sendImmediately': false } },
             function(error, response)
             {
                 if(error)
                 {
-                    console.log("Error-1")
+                    // Influx server responded with error
+                    console.log("Error: ", error)
                     reject("error");
                 }
                 else
                 {
                     try
                     {
+                        //  Once response received from the Influx Server
+                        //  Need to parse the response data
                         var dout = JSON.parse(response.body)
                         if(dout.hasOwnProperty("results"))
                         { 
@@ -316,18 +356,16 @@ exports.readInflux = (indata) => {
                             }
                             else
                             {
-                                console.log("Error-2")
                                 reject("error");
                             }
                         }
                         else
                         {
-                            console.log("Error-3")
                             reject("error");
                         }
                     }
                     catch(err){
-                        console.log("Error-4")
+                        //  When parsing was failed
                         reject("error");
                     }
                         

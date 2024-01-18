@@ -22,7 +22,12 @@
 #       Module created
 ############################################################################*/
 
+// Import the constants from the 'constants' module
 const appconst = require('./misc/constants.js');
+
+// The primary purpose of this module is to respond for the version endpoint
+// Input parameter - None
+// Response - Application Name and Version.
 
 module.exports = function (app) {
     app.get('/version', function(req, res) {

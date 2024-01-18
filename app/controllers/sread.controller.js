@@ -31,11 +31,29 @@
 // aggfn  - Aggregate function (mean, min, max, all)
 
 
+// Import the 'request' module form NPM library
 const request = require('request');
+
+// Import the 'validators' module form local
 const validfn = require('../misc/validators.js');
+
+// Import the 'influx' controller module form local
 const readsens = require('./influx.controller.js');
-const { response } = require('express');
+
+// const { response } = require('express');
+
+// Import the constants from the 'constants' module
 const constants = require('../misc/constants.js');
+
+
+// Read Device Data from the InfluxDB
+// Flow - Send the request to DNC Server along with the DNC Tags
+// DNC Server, extract the HW ID from the given DNC Tags
+// and get the quivalent devID/devEUI by referring the DNC device record
+// Construct query to InfluxDB with devID/devEUI along with other params
+// such as gbt, fmdate, todate and aggfn. Receives the response, replace
+// devID/devEUI details with the DNC tags, then send back the response to
+// the Client (Excel/Google Plugin)
 
 exports.readData = (req, res)  => {
     if(!req.query.client || !req.query.sdata || !req.query.device || !req.query.gbt || 
@@ -80,11 +98,9 @@ exports.readData = (req, res)  => {
 
     var options = {
         url: constants.DNC_URL+"gdevmap",
-        method: 'POST', // Don't forget this line
+        method: 'POST',
         headers: {'Content-Type': 'application/json' },
-        // form: {'cname':req.query.client, 'tagval': req.query.device, 'fmdate': fmdttime, 'todate': todttime}
         form: {'cname':req.query.client, 'tagval': req.query.device}
-        //form: {'cname':req.query.cname}
     };
 
     request(options, function(error,resp) {
@@ -110,6 +126,10 @@ exports.readData = (req, res)  => {
 
 }
 
+
+
+// Construct query for making influx request
+// Send back the received response to the called function.
 
 async function fetchFromInflux(req, res, fmdate, todate)
 {

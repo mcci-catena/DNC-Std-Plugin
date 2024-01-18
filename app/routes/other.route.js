@@ -30,8 +30,19 @@ const dncctrl = require('../controllers/dnc.controller')
 const tokenfn = require('../misc/auth');
 
 module.exports = (app) => {
+    //  Get version of the Std Plugin API
     app.get('/version', verctrl.getVersion);
+    
+    // Login Endpoint, get validated through DNC Server, it responds with JWT
+    // Token
     app.post('/login', loginctrl.getLogin);   // Client login
-    app.get('/sread', tokenfn.authenticateJWT, readctrl.readData);    // Read Sensor Data
+    
+
+    // Endpoint to get device list for the selected tags
     app.post('/devices', tokenfn.authenticateJWT, dncctrl.getDevices); 
+
+
+    //  Endpoint to get sensor data
+    app.get('/sread', tokenfn.authenticateJWT, readctrl.readData);
+
 }

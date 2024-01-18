@@ -22,9 +22,17 @@
 #       Module created
 ############################################################################*/
 
+// Define constants 
+// APP_NAME - Name of the Application
+// APP_VERSION - Version of the Application
+// APP_PORT - Application Port
+// KEY_SECRET - Secret key for generating JWT
+// IFDB_URL - InfluxDB Server URL
+// DNC_URL - DNC Server URL
+
 module.exports = Object.freeze({
     APP_NAME: 'Excel Plugin API',
-    APP_VERSION: '1.1.4',
+    APP_VERSION: '1.1.5',
     APP_PORT: 8892,
 
     KEY_SECRET: 'mcciradweindiauspvp',
@@ -32,7 +40,7 @@ module.exports = Object.freeze({
     IFDB_URL: "http://influxdb:8086/",
     DNC_URL: "http://localhost:8891/",
 
-    // Status Codes
+    // HTTPS reponse Status Codes
     OK : 200,
     Not_found : 404,
     Internal_Server_Error : 500,

@@ -22,8 +22,17 @@
 #       Module created
 ############################################################################*/
 
+// Import jsonwebtoken module from npm library
 const jwt = require('jsonwebtoken');
+
+// Import the constants from the 'constants' module 
 const constants = require('./constants');
+
+// The primary purpose of this module is to verify the JWT 
+// received from the client 
+// Input parameter - JWT in the request header
+// Proceed to execute the next function if the JWT is valid one.
+// Otherwise send response with the error code
 
 exports.authenticateJWT = (req, res, next) => {
     const authHeader = req.headers.authorization;

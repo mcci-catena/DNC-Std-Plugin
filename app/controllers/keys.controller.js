@@ -22,10 +22,19 @@
 #       Module created
 ############################################################################*/
 
+// Import the 'request' module from the npm library
 const request = require('request');
+
+// Import the constants from the 'constants' module
 const constants = require('../misc/constants.js');
 
+// Import the 'influx' module from controller
 const readsens = require('./influx.controller.js');
+
+// The primary purpose of this module is to execute a query on a specified 
+// database server to retrieve a list of databases.
+// Input parameters : None
+// Response : Forwarded the same response received from the Influx Server
 
 exports.getdbs = async (req, res) => {
     
@@ -45,6 +54,11 @@ exports.getdbs = async (req, res) => {
         });
     }
 }
+
+// The primary purpose of this module is to execute a query on a specified 
+// database server to retrieve a list of measurements for the given database.
+// Input parameters : req.params.dbn
+// Response : Forwarded the same response received from the Influx Server
 
 exports.getmeas = async (req, res) => {
     
@@ -72,6 +86,13 @@ exports.getmeas = async (req, res) => {
     }
 }
 
+// The primary purpose of this module is to query field keys from the measurement
+// Query with the Client/Org Name will be sent to DNC Server, DNC Server fetch 
+// the associated Influx details from the DNC Database, then construct the query 
+// to get field keys from the InfluxDB for the given DB name and measurement name.
+// Input parameters: req.query.client
+// Response: Dict object {"fields": []}
+
 exports.getfields = async (req, res) => {
     
     if(!req.query.client)
@@ -83,7 +104,7 @@ exports.getfields = async (req, res) => {
 
     var options = {
         url: constants.DNC_URL+"gfields",
-        method: 'POST', // Don't forget this line
+        method: 'POST',
         headers: {'Content-Type': 'application/json' },
         form: {'cname':req.query.client}
     };
@@ -106,6 +127,12 @@ exports.getfields = async (req, res) => {
         }
     });
 }
+
+
+// The primary purpose of this module is to query tag keys from the measurement
+// to get tag keys from the InfluxDB for the given DB name and measurement name.
+// Input parameters: req.query.db, req.query.meas
+// Response : Forwarded the same response received from the Influx Server
 
 exports.gettags = async (req, res) => {
     
@@ -140,6 +167,11 @@ exports.gettags = async (req, res) => {
 
 }
 
+
+// The primary purpose of this module is to query tag keys from the measurement
+// to get tag values from the InfluxDB for the given DB, measurement name  and tag key.
+// Input parameters: req.query.db, req.query.meas, req.params.key
+// Response : Forwarded the same response received from the Influx Server
 
 exports.gettvals = async (req, res) => {
     

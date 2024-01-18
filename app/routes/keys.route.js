@@ -28,9 +28,16 @@ const tokenfn = require('../misc/auth');
 
 module.exports = (app) => {
 
+    // app.method(Endpoint, Token validation, resource)
+    // JWT - JSON Web Token
+    //  Get list of database names under Influx 
     app.post('/dbs', tokenfn.authenticateJWT, keyctrl.getdbs);
     app.post('/meas/:dbn', tokenfn.authenticateJWT, keyctrl.getmeas);
     app.post('/fields', tokenfn.authenticateJWT, keyctrl.getfields);
+    
+    // Get list of tags under the measurement
     app.post('/tags', tokenfn.authenticateJWT, keyctrl.gettags);
+    
+    // Get Values for the given tag 
     app.post('/tvals/:tkey', tokenfn.authenticateJWT, keyctrl.gettvals);
 }
